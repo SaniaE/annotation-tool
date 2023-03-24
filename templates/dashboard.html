@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+
+    <!-- Chartjs CDN for displaying the graph -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-autocolors"></script>
+</head>
+<body>
+    <!-- Chart -->
+    <h1>Stats</h1>
+    <canvas id="stats" height="300px"></canvas>
+
+    <!-- Download zip file -->
+    <br><br>
+    <a href="{{url_for('download')}}">Download</a>
+    
+    <!-- Clean up link -->
+    <a href="{{url_for('cleanup')}}">Continue</a>
+    <!-- Add functionality to stay -->
+    <a href="{{url_for('cleanup')}}">Cancel</a>
+
+</body>
+
+<script>
+    // Retrieving chart data
+    labels = '{{stats["labels"]}}'
+    labels = labels.replaceAll("&#39;", "\"")
+    labels = Array.from(JSON.parse(labels))
+
+    data = '{{stats["count"]}}'
+    data = data.replaceAll("&#39;", "\"")
+    data = Array.from(JSON.parse(data))
+    
+    
+    // Importing colors
+    const autocolors = window['chartjs-plugin-autocolors'];
+    Chart.register(autocolors);
+    
+    stats = document.getElementById("stats")
+    // Displaying a bar chart with labels and image counts 
+    new Chart(stats, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Files",
+                    data: data,
+                    borderWidth: 1
+                }
+            ]
+        },
+        options:{
+            plugins: {
+                autocolors: {
+                    mode: 'data'
+                }
+            }
+        }
+    });
+
+</script>
+
+</html>

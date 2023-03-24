@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Get started</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+</head>
+
+<body>
+    <!-- Upload images -->
+    {% if not page %}
+        <form action="/upload" method="POST" enctype="multipart/form-data" id="uploads">
+            <input type="file" name="file" id="inputFiles" multiple accept="image/png, image/jpg, image/jpeg" required>
+            <input type="submit" name="submit" id="submit">
+
+            <p id="tooltip" style="display:none">File limit exceeded! Can upload only 100.</p>
+        </form>
+    {% else %}
+    <br>
+    <!-- Checkout uploaded images -->
+    <div class="image-section">
+        <div class="allFiles" style="float: left">
+            {% for i in allFiles %}
+                <a href="/?page={{ allFiles.index(i) +1 }}">{{i}}</a>
+            {% endfor %}
+        </div>
+
+        <br>
+            <!-- Progress indicator -->
+            <h3>{{page.number}} / {{page.paginator.num_pages}}</h3>
+
+            <br>
+            <!-- Annotation section -->
+            <div class="annotate">
+                {% for image in images %}
+                    <div id="imagesArea">
+                        <a href="{{url_for('serve', filename=image)}}" target="_blank">
+                            <img src="{{url_for('serve', filename=image)}}" alt="">
+                        </a>
+                        <a href="{{url_for('delete', filename=image)}}">Delete</a>
+                    </div>
+
+                    <div id="promptsSection">
+                        <form action="/prompt" method="POST">
+                            <!-- To set the prompt name -->
+                            <input type="hidden" name="image" value="{{image}}">
+                            {% for i in range(1,11) %}
+                                <label for="Prompt{{i}}">Prompt {{i}} for {{image}}_{{i|string}}</label>
+                                <!-- TODO: Add required for the input fields -->
+                                {% if prompts %}
+                                    {% set prompt = prompts.split('\n')%}
+                                    <input type="text" name="{{image}}_{{i}}" class="prompts" value="{{prompt[i-1]}}">
+                                {% else %}
+                                    <input type="text" name="{{image}}_{{i}}" class="prompts">
+                                {% endif %}
+
+                                {% endfor %}
+                                <br>
+                                Label: <input type="text" id="label" name="label" required value="{{label}}">
+                                <div id="filters">
+                                    {% for i in labels %}
+                                        <li class="filter" style="display:none;" id="{{i}}">{{i}}</li>
+                                    {% endfor %}
+                                    <a id="add" style="display:none;">Add Category</a>
+                                </div>
+                            <input type="submit">
+                        </form>
+                    </div>
+                </div>
+
+                <br>
+                <!-- Navigate through the images :DONE-->
+                <div id="navigate">
+                    {% if page.has_previous() %}
+                        <a href="/?page={{ page.previous_page_number() }}">Previous</a>
+                    {% endif %}
+                    {% if page.has_next() %}
+                        <a href="/?page={{ page.next_page_number() }}">Next</a>
+                    {% elif page.number == page.paginator.num_pages %}
+                        <a href="/dashboard">Complete</a>
+                    {% endif %}
+                </div>
+                <br>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+</body>
+
+<script>
+
+    tooltip = document.getElementById("tooltip");
+    inputFiles = document.getElementById("inputFiles");
+    submit = document.getElementById("submit")
+
+    if(inputFiles){
+            inputFiles.addEventListener('change', ()=>{
+            if(inputFiles.files.length > 100){
+                submit.style.display = "none"
+                tooltip.style.display = ""
+            }
+            else{
+                submit.style.display = ""
+                tooltip.style.display = "none"
+            }
+        });
+    }
+
+    filters = document.getElementById("filters");
+    filter = filters.getElementsByTagName('li');
+    label = document.getElementById("label");
+
+    labels = [];
+
+    Array.from(filter).forEach(element => {
+        labels.push(element.id);    
+    });
+
+    label.addEventListener('input', (e)=>{
+        val = e.target.value;
+
+        if(val == ""){
+            filters.style.display = "none";
+        }
+        else{
+            filters.style.display = "";
+        }
+
+        for (i = 0; i < labels.length; i++) {
+            if (labels[i].toLowerCase().indexOf(val) > -1) {
+                filter[i].style.display = "";
+            } 
+            else {
+                filter[i].style.display = "none";
+            }
+        }
+
+        if(!labels.includes(val.toLowerCase())){
+            document.getElementById("add").style.display = "";
+        }
+    });
+
+</script>
+
+</html>
