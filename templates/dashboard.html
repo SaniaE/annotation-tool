@@ -14,6 +14,17 @@
     <h1>Stats</h1>
     <canvas id="stats" height="300px"></canvas>
 
+    {% if stats['pending'] %}
+        <h3>Pending files: {{stats['pending']}}</h3>
+    {% endif %}
+
+    <!-- Rename files -->
+    <!-- <form action="/rename"> -->
+        <!-- TODO: Add rename functionality per label -->
+        <!-- Rename files: <input type="number" min="0" name="rename_range">
+        <input type="submit"> -->
+    <!-- </form> -->
+
     <!-- Download zip file -->
     <br><br>
     <a href="{{url_for('download')}}">Download</a>

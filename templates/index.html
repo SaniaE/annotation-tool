@@ -4,6 +4,11 @@
 <head>
     <title>Get started</title>
     <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+
+    <!-- Cropper js -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.css" integrity="sha512-C4k/QrN4udgZnXStNFS5osxdhVECWyhMsK1pnlk+LkC7yJGCqoYxW4mH3/ZXLweODyzolwdWSqmmadudSHMRLA==" crossorigin="anonymous" referrerpolicy="no-referrer" /> -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" integrity="sha512-cyzxRvewl+FOKTtpBzYjW6x6IAYUCZy3sGP40hn+DQkqeluGRCax7qztK2ImL64SA+C7kVWdLI6wvdlStawhyw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 
 <body>
@@ -26,6 +31,13 @@
         </div>
 
         <br>
+        <br>
+        <!-- Save progress button -->
+        <div class="save">
+            <a href="/dashboard">Save progress</a>
+        </div>
+
+        <br>
             <!-- Progress indicator -->
             <h3>{{page.number}} / {{page.paginator.num_pages}}</h3>
 
@@ -34,10 +46,11 @@
             <div class="annotate">
                 {% for image in images %}
                     <div id="imagesArea">
-                        <a href="{{url_for('serve', filename=image)}}" target="_blank">
-                            <img src="{{url_for('serve', filename=image)}}" alt="">
-                        </a>
+                        <!-- <a href="{{url_for('serve', filename=image)}}" target="_blank"> -->
+                            <img src="{{url_for('serve', filename=image)}}" alt="" id="{{image}}">
+                        <!-- </a> -->
                         <a href="{{url_for('delete', filename=image)}}">Delete</a>
+                        <button id="crop" value="{{image}}">Crop</button>
                     </div>
 
                     <div id="promptsSection">
@@ -87,8 +100,11 @@
 
 </body>
 
+<!-- Cropper js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js" integrity="sha512-6lplKUSl86rUVprDIjiW8DuOniNX8UDoRATqZSds/7t6zCQZfaCe3e5zcGaQwxa8Kpn5RTM9Fvl3X2lLV4grPQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.js" integrity="sha512-LjPH94gotDTvKhoxqvR5xR2Nur8vO5RKelQmG52jlZo7SwI5WLYwDInPn1n8H9tR0zYqTqfNxWszUEy93cHHwg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
 <script>
-
+    // FILE LIMIT 
     tooltip = document.getElementById("tooltip");
     inputFiles = document.getElementById("inputFiles");
     submit = document.getElementById("submit")
@@ -106,6 +122,7 @@
         });
     }
 
+    // LABEL FILTERS
     filters = document.getElementById("filters");
     filter = filters.getElementsByTagName('li');
     label = document.getElementById("label");
@@ -140,6 +157,31 @@
         }
     });
 
+    // CROPPER
+    cropImage = document.getElementById("crop");
+    image = "";
+    var cropper; 
+    cropImage.addEventListener('click', ()=>{
+        if(cropImage.innerText == "Crop"){   
+            cropImage.innerText = "Save Image";
+            image = document.getElementById(cropImage.value);
+            cropper = new Cropper(image, {
+                aspectRatio: 0, 
+                viewMode: 0
+            })
+        }
+        else{
+            croppedImage = cropper.getCroppedCanvas().toDataURL('image/png');
+            // Send the image data to be saved 
+            xhr = new XMLHttpRequest();
+            xhr.open('POST', '/crop', true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.send(`dataURL=${encodeURIComponent(croppedImage)}&filename=${image.id}`);
+            cropImage.innerText = "Crop";
+            cropper.destroy();
+            location.reload();
+        }
+    });
 </script>
 
 </html>

@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, redirect, send_from_directory, send_file
 from werkzeug.utils import secure_filename
 from django.core.paginator import Paginator
-from collections import defaultdict
+from helper import *
 import os 
 import shutil
+import base64
 
 app = Flask(__name__)
 
@@ -90,18 +91,24 @@ def delete(filename):
 
 @app.route('/dashboard')
 def dashboard():
-    create_folders()
-    
+    create_folders(mappings, app)
+
     labels = os.listdir(app.config["DIRECTORY"])
     
-    # Add pending files too? 
-    if 'pending' in labels:
-        labels.remove('pending')
-
     # Send total labels and files under those labels 
     stats = {}
     stats['labels'] = labels
     stats['count'] = []
+
+    # Add pending files too
+    if 'pending' in labels:
+        pending_files = len(os.listdir(app.config["UPLOAD_DIRECTORY"]))
+        if pending_files == 0:
+            os.rmdir(app.config["UPLOAD_DIRECTORY"])
+        else: 
+            stats['pending'] = pending_files
+
+        labels.remove('pending')
 
     # Create one to check number of images per label 
     for i in labels:
@@ -132,7 +139,6 @@ def prompt():
     else:
         return redirect('/dashboard')
 
-
 # Download zip 
 @app.route('/download', methods=["GET"])
 def download():
@@ -159,44 +165,17 @@ def cleanup():
     return redirect('/')
 
 
-# HELPER FUNCTIONS 
-def create_text_files(filePath, promptsStr):
-    # Create text file or override if it exists 
-    file = open(filePath + '.txt', 'w')
-    file.write(promptsStr)
+@app.route('/crop', methods=["POST"])
+def crop():
+    img = request.form['dataURL']
+    fileName = request.form['filename']
+
+    imgData = base64.b64decode((img.split(','))[1])
+
+    with open(os.path.join(app.config['UPLOAD_DIRECTORY'], fileName), 'wb') as file:
+        file.write(imgData)
     file.close()
 
-
-def create_folders():
-    labels = list(set(val['label'] for val in mappings.values()))
-    print(labels)
-
-    for i in labels:
-        base_url = app.config["DIRECTORY"] + "/" + i
-        print(base_url)
-
-        # Create a directory and subdirectories 
-        os.mkdir(base_url)
-        os.mkdir(base_url + "/images")
-        os.mkdir(base_url + "/prompts")
-
-        # Move all the files to their respective image folders 
-        contents = get_folder_contents(i)
-        for file in contents: 
-            shutil.move(app.config['UPLOAD_DIRECTORY'] + '/' + file, base_url + "/images/" + file)
-
-            # Create all textfiles in the prompts section 
-            create_text_files(base_url + "/prompts/" + file, mappings[file]["prompts"])
-
-
-# Structure of the mapping 
-# "filename" : [promptstr, label] 4KB for 100 
-
-def get_folder_contents(label):
-    reverse = defaultdict(list)
-    for image, val in mappings.items():
-        reverse[val["label"]].append(image)
-    return reverse[label]
-
+    return redirect('/')
 
 app.run()
