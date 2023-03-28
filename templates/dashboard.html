@@ -13,67 +13,20 @@
     <!-- Chart -->
     <h1>Stats</h1>
     <canvas id="stats" height="300px"></canvas>
-
-    {% if stats['pending'] %}
-        <h3>Pending files: {{stats['pending']}}</h3>
-    {% endif %}
-
-    <!-- Rename files -->
-    <!-- <form action="/rename"> -->
-        <!-- TODO: Add rename functionality per label -->
-        <!-- Rename files: <input type="number" min="0" name="rename_range">
-        <input type="submit"> -->
-    <!-- </form> -->
-
+    
     <!-- Download zip file -->
     <br><br>
     <a href="{{url_for('download')}}">Download</a>
     
-    <!-- Clean up link -->
+    <!-- TODO: Clean up link -->
     <a href="{{url_for('cleanup')}}">Continue</a>
-    <!-- Add functionality to stay -->
+
+    <!-- TODO: Add functionality to stay -->
     <a href="{{url_for('cleanup')}}">Cancel</a>
 
 </body>
-
+<script src="{{url_for('static', filename='dashboard.js')}}"></script>
 <script>
-    // Retrieving chart data
-    labels = '{{stats["labels"]}}'
-    labels = labels.replaceAll("&#39;", "\"")
-    labels = Array.from(JSON.parse(labels))
-
-    data = '{{stats["count"]}}'
-    data = data.replaceAll("&#39;", "\"")
-    data = Array.from(JSON.parse(data))
-    
-    
-    // Importing colors
-    const autocolors = window['chartjs-plugin-autocolors'];
-    Chart.register(autocolors);
-    
-    stats = document.getElementById("stats")
-    // Displaying a bar chart with labels and image counts 
-    new Chart(stats, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: "Files",
-                    data: data,
-                    borderWidth: 1
-                }
-            ]
-        },
-        options:{
-            plugins: {
-                autocolors: {
-                    mode: 'data'
-                }
-            }
-        }
-    });
-
+    chart('{{stats["labels"]}}', '{{stats["count"]}}')
 </script>
-
 </html>

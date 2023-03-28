@@ -6,8 +6,6 @@
     <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
 
     <!-- Cropper js -->
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.css" integrity="sha512-C4k/QrN4udgZnXStNFS5osxdhVECWyhMsK1pnlk+LkC7yJGCqoYxW4mH3/ZXLweODyzolwdWSqmmadudSHMRLA==" crossorigin="anonymous" referrerpolicy="no-referrer" /> -->
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" integrity="sha512-cyzxRvewl+FOKTtpBzYjW6x6IAYUCZy3sGP40hn+DQkqeluGRCax7qztK2ImL64SA+C7kVWdLI6wvdlStawhyw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 
@@ -46,10 +44,10 @@
             <div class="annotate">
                 {% for image in images %}
                     <div id="imagesArea">
-                        <!-- <a href="{{url_for('serve', filename=image)}}" target="_blank"> -->
-                            <img src="{{url_for('serve', filename=image)}}" alt="" id="{{image}}">
-                        <!-- </a> -->
+                        <img src="{{url_for('serve', filename=image)}}" alt="" id="{{image}}">
                         <a href="{{url_for('delete', filename=image)}}">Delete</a>
+                        <label for="copy">Copy</label>
+                        <input type="checkbox" id="copy" style="display:none;" name="copy">
                         <button id="crop" value="{{image}}">Crop</button>
                     </div>
 
@@ -58,7 +56,7 @@
                             <!-- To set the prompt name -->
                             <input type="hidden" name="image" value="{{image}}">
                             {% for i in range(1,11) %}
-                                <label for="Prompt{{i}}">Prompt {{i}} for {{image}}_{{i|string}}</label>
+                                <label for="Prompt{{i}}">Prompt {{i}}</label>
                                 <!-- TODO: Add required for the input fields -->
                                 {% if prompts %}
                                     {% set prompt = prompts.split('\n')%}
@@ -67,22 +65,22 @@
                                     <input type="text" name="{{image}}_{{i}}" class="prompts">
                                 {% endif %}
 
+                            {% endfor %}
+                            <br>
+                            Label: <input type="text" id="label" name="label" required value="{{label}}">
+                            <div id="filters">
+                                {% for i in labels %}
+                                    <div class="filter" style="display:none;" id="{{i}}">{{i}}</div>
                                 {% endfor %}
-                                <br>
-                                Label: <input type="text" id="label" name="label" required value="{{label}}">
-                                <div id="filters">
-                                    {% for i in labels %}
-                                        <li class="filter" style="display:none;" id="{{i}}">{{i}}</li>
-                                    {% endfor %}
-                                    <a id="add" style="display:none;">Add Category</a>
-                                </div>
+                                <a id="add" style="display:none;">Add Category</a>
+                            </div>
                             <input type="submit">
                         </form>
                     </div>
                 </div>
 
                 <br>
-                <!-- Navigate through the images :DONE-->
+                <!-- Navigate through the images -->
                 <div id="navigate">
                     {% if page.has_previous() %}
                         <a href="/?page={{ page.previous_page_number() }}">Previous</a>
@@ -102,86 +100,5 @@
 
 <!-- Cropper js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js" integrity="sha512-6lplKUSl86rUVprDIjiW8DuOniNX8UDoRATqZSds/7t6zCQZfaCe3e5zcGaQwxa8Kpn5RTM9Fvl3X2lLV4grPQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.js" integrity="sha512-LjPH94gotDTvKhoxqvR5xR2Nur8vO5RKelQmG52jlZo7SwI5WLYwDInPn1n8H9tR0zYqTqfNxWszUEy93cHHwg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
-<script>
-    // FILE LIMIT 
-    tooltip = document.getElementById("tooltip");
-    inputFiles = document.getElementById("inputFiles");
-    submit = document.getElementById("submit")
-
-    if(inputFiles){
-            inputFiles.addEventListener('change', ()=>{
-            if(inputFiles.files.length > 100){
-                submit.style.display = "none"
-                tooltip.style.display = ""
-            }
-            else{
-                submit.style.display = ""
-                tooltip.style.display = "none"
-            }
-        });
-    }
-
-    // LABEL FILTERS
-    filters = document.getElementById("filters");
-    filter = filters.getElementsByTagName('li');
-    label = document.getElementById("label");
-
-    labels = [];
-
-    Array.from(filter).forEach(element => {
-        labels.push(element.id);    
-    });
-
-    label.addEventListener('input', (e)=>{
-        val = e.target.value;
-
-        if(val == ""){
-            filters.style.display = "none";
-        }
-        else{
-            filters.style.display = "";
-        }
-
-        for (i = 0; i < labels.length; i++) {
-            if (labels[i].toLowerCase().indexOf(val) > -1) {
-                filter[i].style.display = "";
-            } 
-            else {
-                filter[i].style.display = "none";
-            }
-        }
-
-        if(!labels.includes(val.toLowerCase())){
-            document.getElementById("add").style.display = "";
-        }
-    });
-
-    // CROPPER
-    cropImage = document.getElementById("crop");
-    image = "";
-    var cropper; 
-    cropImage.addEventListener('click', ()=>{
-        if(cropImage.innerText == "Crop"){   
-            cropImage.innerText = "Save Image";
-            image = document.getElementById(cropImage.value);
-            cropper = new Cropper(image, {
-                aspectRatio: 0, 
-                viewMode: 0
-            })
-        }
-        else{
-            croppedImage = cropper.getCroppedCanvas().toDataURL('image/png');
-            // Send the image data to be saved 
-            xhr = new XMLHttpRequest();
-            xhr.open('POST', '/crop', true);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.send(`dataURL=${encodeURIComponent(croppedImage)}&filename=${image.id}`);
-            cropImage.innerText = "Crop";
-            cropper.destroy();
-            location.reload();
-        }
-    });
-</script>
-
+<script src="{{url_for('static', filename='index.js')}}"></script>
 </html>

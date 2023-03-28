@@ -5,6 +5,7 @@ from helper import *
 import os 
 import shutil
 import base64
+import random
 
 app = Flask(__name__)
 
@@ -17,19 +18,12 @@ mappings = {}
 
 @app.route('/', methods=["GET", "POST"])
 def home():
+    initialize(app)
     global objects 
     objects = []
     prompt = []
     labels = []
     label = ""
-
-    if os.path.isdir(app.config['DIRECTORY']) and os.path.isfile('dataset.zip'):
-        shutil.rmtree(app.config['DIRECTORY'])
-        os.remove('dataset.zip')
-    
-    if not os.path.exists(app.config['DIRECTORY']):
-        os.makedirs(app.config['DIRECTORY'])
-        os.makedirs(app.config['UPLOAD_DIRECTORY'])
 
     images = os.listdir(app.config['UPLOAD_DIRECTORY'])
 
@@ -49,7 +43,7 @@ def home():
 
         if mappings[objects[0]]['prompts'] != "":
             prompt = mappings[objects[0]]['prompts']
-        
+
         labels = list(set(val['label'] for val in mappings.values()))
         label = mappings[objects[0]]['label']
 
@@ -81,6 +75,8 @@ def delete(filename):
     if os.path.isfile(file_path):
         os.remove(file_path)
 
+    del mappings[filename]
+
     if objects.has_next():
         return redirect('/?page='+str(objects.number))
     elif len(os.listdir(app.config["UPLOAD_DIRECTORY"])) == 0:
@@ -91,33 +87,22 @@ def delete(filename):
 
 @app.route('/dashboard')
 def dashboard():
-    create_folders(mappings, app)
+    labels = list(set(val['label'] for val in mappings.values()))
 
-    labels = os.listdir(app.config["DIRECTORY"])
-    
     # Send total labels and files under those labels 
     stats = {}
-    stats['labels'] = labels
     stats['count'] = []
-
-    # Add pending files too
-    if 'pending' in labels:
-        pending_files = len(os.listdir(app.config["UPLOAD_DIRECTORY"]))
-        if pending_files == 0:
-            os.rmdir(app.config["UPLOAD_DIRECTORY"])
-        else: 
-            stats['pending'] = pending_files
-
-        labels.remove('pending')
 
     # Create one to check number of images per label 
     for i in labels:
-        folder_path = 'uploads/' + i + '/images'
-        img_count = len(os.listdir(folder_path))
-        stats['count'].append(img_count)
+        stats['count'].append(len(get_folder_contents(i, mappings)))
     
-    return render_template('dashboard.html', stats=stats)
+    if '' in labels:
+        labels[labels.index('')] = "Pending prompts"
 
+    stats['labels'] = labels
+
+    return render_template('dashboard.html', stats=stats)
 
 # Prompts 
 @app.route('/prompt', methods=["POST", "GET"])
@@ -142,6 +127,8 @@ def prompt():
 # Download zip 
 @app.route('/download', methods=["GET"])
 def download():
+    create_folders(mappings, app)
+
     # Convert to zip 
     try:
         shutil.make_archive('dataset', 'zip', app.config['DIRECTORY'])
@@ -169,6 +156,20 @@ def cleanup():
 def crop():
     img = request.form['dataURL']
     fileName = request.form['filename']
+    copyFile = request.form['copy']
+
+    # Saving crops 
+    if copyFile == "true":
+        newName = fileName.split('.')[0] + str(random.randint(1, 100)) + '.' + fileName.split('.')[1]
+        if not os.path.exists(app.config['UPLOAD_DIRECTORY'] + newName):
+            shutil.copy2(app.config['UPLOAD_DIRECTORY'] + fileName, app.config['UPLOAD_DIRECTORY'] + newName)
+        else:
+            newName = fileName.split('.')[0] + str(random.randint(1, 100)) + str(random.randint(1, 100)) + '.' + fileName.split('.')[1]
+            shutil.copy2(app.config['UPLOAD_DIRECTORY'] + fileName, app.config['UPLOAD_DIRECTORY'] + newName)
+
+    mappings[newName] = {}
+    mappings[newName]['prompts'] = ""
+    mappings[newName]['label'] = ""
 
     imgData = base64.b64decode((img.split(','))[1])
 
