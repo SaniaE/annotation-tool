@@ -86,11 +86,14 @@ copy.addEventListener('change', ()=>{
     copyBool = copy.checked;
 })
 
+cancel = document.getElementById("cancel");
+
 // Cropper instances 
 cropImage.addEventListener('click', ()=>{
     if(cropImage.innerText == "Crop"){   
         copy.style.display = "";
         cropImage.innerText = "Save Image";
+        cancel.style.display = "";
 
         image = document.getElementById(cropImage.value);
         cropper = new Cropper(image, {
@@ -107,8 +110,16 @@ cropImage.addEventListener('click', ()=>{
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send(`dataURL=${encodeURIComponent(croppedImage)}&filename=${image.id}&copy=${copyBool}`);
         
+        location.reload();
+        location.reload();
+
         // Cleanup 
         cropper.destroy();
         location.reload();
     }
+});
+
+cancel.addEventListener('click', ()=>{
+    cropper.destroy();
+    cancel.style.display = "none";
 });
