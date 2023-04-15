@@ -49,6 +49,7 @@
                         <label for="copy">Copy</label>
                         <input type="checkbox" id="copy" style="display:none;" name="copy">
                         <button id="crop" value="{{image}}">Crop</button>
+                        <button id="cancel" style="display:none;">Cancel</button>
                     </div>
 
                     <div id="promptsSection">
@@ -60,9 +61,9 @@
                                 <!-- TODO: Add required for the input fields -->
                                 {% if prompts %}
                                     {% set prompt = prompts.split('\n')%}
-                                    <input type="text" name="{{image}}_{{i}}" class="prompts" value="{{prompt[i-1]}}">
+                                    <textarea type="text" name="{{image}}_{{i}}" class="prompts" value="{{prompt[i-1]}}"></textarea>
                                 {% else %}
-                                    <input type="text" name="{{image}}_{{i}}" class="prompts">
+                                    <textarea type="text" name="{{image}}_{{i}}" class="prompts"></textarea>
                                 {% endif %}
 
                             {% endfor %}
