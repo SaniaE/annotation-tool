@@ -6,6 +6,7 @@ import os
 import shutil
 import base64
 import random
+import webview
 
 app = Flask(__name__)
 
@@ -141,17 +142,6 @@ def download():
     return send_file('dataset.zip', as_attachment=True)
 
 
-@app.route('/cleanup')
-def cleanup():
-    if os.path.isdir(app.config['DIRECTORY']):
-        shutil.rmtree(app.config['DIRECTORY'])
-
-    if os.path.isfile('dataset.zip'):
-        os.remove('dataset.zip')
-
-    return redirect('/')
-
-
 @app.route('/crop', methods=["POST"])
 def crop():
     img = request.form['dataURL']
@@ -167,9 +157,9 @@ def crop():
             newName = fileName.split('.')[0] + str(random.randint(1, 100)) + str(random.randint(1, 100)) + '.' + fileName.split('.')[1]
             shutil.copy2(app.config['UPLOAD_DIRECTORY'] + fileName, app.config['UPLOAD_DIRECTORY'] + newName)
 
-    mappings[newName] = {}
-    mappings[newName]['prompts'] = ""
-    mappings[newName]['label'] = ""
+        mappings[newName] = {}
+        mappings[newName]['prompts'] = ""
+        mappings[newName]['label'] = ""
 
     imgData = base64.b64decode((img.split(','))[1])
 
@@ -179,4 +169,16 @@ def crop():
 
     return redirect('/')
 
-app.run()
+
+if __name__ == "__main__":
+    window = webview.create_window("Image-Prompt Annotator", app, confirm_close=True)
+    webview.start()
+    # Memory cleanup 
+    if window.events.closed:
+        if os.path.isdir(app.config['DIRECTORY']):
+            shutil.rmtree(app.config['DIRECTORY'])
+
+        if os.path.isfile('dataset.zip'):
+            os.remove('dataset.zip')
+
+        mappings = {}
