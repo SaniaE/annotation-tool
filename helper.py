@@ -5,10 +5,6 @@ from collections import defaultdict
 # HELPER FUNCTIONS 
 # Initialize folders and cleanup for the application
 def initialize(app):
-    if os.path.isdir(app.config['DIRECTORY']) and os.path.isfile('dataset.zip'):
-        shutil.rmtree(app.config['DIRECTORY'])
-        os.remove('dataset.zip')
-    
     if not os.path.exists(app.config['DIRECTORY']):
         os.makedirs(app.config['DIRECTORY'])
         os.makedirs(app.config['UPLOAD_DIRECTORY'])
@@ -29,10 +25,15 @@ def create_folders(mappings, app):
         labels.remove("")
     
         for i in labels:
+            # Add folder name safety 
+            if len(i.split()) > 2:
+                for c in i.split():
+                    i += c + '_'
+
             base_url = app.config["DIRECTORY"] + i
 
+            # Create a directory and subdirectories 
             if not os.path.exists(base_url):
-                # Create a directory and subdirectories 
                 os.mkdir(base_url)
                 os.mkdir(base_url + "/images")
                 os.mkdir(base_url + "/prompts")
@@ -43,7 +44,7 @@ def create_folders(mappings, app):
                 shutil.move(app.config['UPLOAD_DIRECTORY'] + '/' + file, base_url + "/images/" + file)
 
                 # Create all textfiles in the prompts section 
-                create_text_files(base_url + "/prompts/" + file, mappings[file]["prompts"])
+                create_text_files(base_url + "/prompts/" + file.split('.')[0], mappings[file]["prompts"])
     else:
         if len(os.listdir(app.config["UPLOAD_DIRECTORY"])) == 0:
             os.rmdir(app.config["UPLOAD_DIRECTORY"])
