@@ -1,0 +1,121 @@
+*{
+    /* CSS Reset */
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+:root{
+    --blue: #343840;
+    --whiteish: #F6F6F6;
+    --purple: #705FD9;
+    --purple-light: #D3C4F2;
+    --font-color: #f6f6f6;
+    --placeholder: #F3F4F6FF;
+}
+
+body{
+    padding: 0rem 7rem;
+    font-family: Calibre, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    display: flex;
+    height: 100vh;
+}
+
+
+.heading>h1{
+    font-size: 1.5rem;
+}
+
+.hero-section{
+    padding: 1.7rem 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.content>h1{
+    font-size: 2.2rem;
+}
+
+.hero, .files-upload{
+    display: flex;
+    flex-direction: column;
+}
+
+.hero{
+    width: 90%;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+p{
+    padding: 10px 0px;
+    font-size: large;
+    line-height: 1.5;
+    text-align: justify;
+}
+
+.hero-img{
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+}
+
+.hero-img>img{
+    width: 100%;
+    height: 100%;
+}
+
+.files-upload{
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    padding: 0px 30px;
+    background-color: var(--blue);
+    color: var(--font-color);
+    width: 75%;
+}
+
+.upload-btn-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    width: 100%;
+}
+  
+.btn {
+    background-image: url('icons/icon.png'); 
+    background-color: white;
+    padding: 8px 20px;
+    background-size: 30%;
+    background-repeat: no-repeat;
+    background-position: center center;
+    height: 215px;
+    width: 100%;
+    border-radius: 8px;
+}
+
+.btn>text{
+    font-size: 30px;
+}
+
+.upload-btn-wrapper input[type=file] {
+    font-size: 100px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+}
+
+.submit-btn{
+    margin-top: 10px;
+    width: 100%;
+    background-color: var(--purple);
+    color: white;
+    outline: none;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 3px;
+    font-size: 1rem;    
+    font-family: Calibre, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
