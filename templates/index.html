@@ -3,7 +3,7 @@
 
 <head>
     <title>Get started</title>
-    <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='landing_style.css')}}">
 
     <!-- Cropper js -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" integrity="sha512-cyzxRvewl+FOKTtpBzYjW6x6IAYUCZy3sGP40hn+DQkqeluGRCax7qztK2ImL64SA+C7kVWdLI6wvdlStawhyw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -12,12 +12,48 @@
 <body>
     <!-- Upload images -->
     {% if not page %}
-        <form action="/upload" method="POST" enctype="multipart/form-data" id="uploads">
-            <input type="file" name="file" id="inputFiles" multiple accept="image/png, image/jpg, image/jpeg" required>
-            <input type="submit" name="submit" id="submit">
+        <div class="hero-section">
+            <div class="heading">
+                <h1>Image-Prompt Annotator</h1>
+                <br><br>
+            </div>
 
-            <p id="tooltip" style="display:none">File limit exceeded! Can upload only 100.</p>
-        </form>
+            <div class="hero">
+                <div class="content">
+                    <h1>Create Custom Datasets for Text-to-Image Generators Seamlessly</h1>
+                
+                    <br>
+                    
+                    <p>Designed to simplify the process of creating high-quality datasets for text-to-image generation models, the platform enables an ease of navigation through your uploaded images, with features that ensure your dataset is tailored to meet your specific needs.</p>
+
+                    <p>Label and attach prompts to your images, with our easy-to-use interface and download an organized dataset for use, on completion. </p>
+                </div>
+                <br>
+                <div class="hero-img">
+                    <img src="{{url_for('static', filename='images/captioning.png')}}" alt="">
+                </div>
+            </div>
+        </div>
+        <div class="files-upload">
+            <div class="title">
+                <br><br>
+                <h1>Upload your images here</h1>
+                <br>
+                <h3>File limit: 100</h3>
+                <br>
+                <p>One can upload a raw capture of data through approaches like web-scraping and easily organize their dataset through the platform</p>
+            </div>
+            <br>
+            <form action="/upload" method="POST" enctype="multipart/form-data" id="uploads" class="uploads">
+                <div class="upload-btn-wrapper">
+                    <button class="btn"></button>
+                    <input type="file" name="file" id="inputFiles" multiple accept="image/png, image/jpg, image/jpeg" required>
+                </div>
+                <input type="submit" name="submit" id="submit" class="submit-btn">
+
+                <p id="tooltip" style="display:none">File limit exceeded! Can upload only 100.</p>
+            </form>
+        </div>
     {% else %}
     <br>
     <!-- Checkout uploaded images -->
