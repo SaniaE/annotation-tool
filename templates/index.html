@@ -3,7 +3,17 @@
 
 <head>
     <title>Get started</title>
+    <!-- Stylesheet -->
     <link rel="stylesheet" href="{{url_for('static', filename='landing_style.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='image_style.css')}}">
+
+    <!-- Chartjs CDN for displaying the graph -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-autocolors"></script>
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/regular.min.css" />
 
     <!-- Cropper js -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" integrity="sha512-cyzxRvewl+FOKTtpBzYjW6x6IAYUCZy3sGP40hn+DQkqeluGRCax7qztK2ImL64SA+C7kVWdLI6wvdlStawhyw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -12,6 +22,7 @@
 <body>
     <!-- Upload images -->
     {% if not page %}
+    <div id="landingSection">
         <div class="hero-section">
             <div class="heading">
                 <h1>Image-Prompt Annotator</h1>
@@ -54,41 +65,78 @@
                 <p id="tooltip" style="display:none">File limit exceeded! Can upload only 100.</p>
             </form>
         </div>
+    </div>
     {% else %}
-    <br>
     <!-- Checkout uploaded images -->
-    <div class="image-section">
-        <div class="allFiles" style="float: left">
-            {% for i in allFiles %}
-                <a href="/?page={{ allFiles.index(i) +1 }}">{{i}}</a>
-            {% endfor %}
-        </div>
-
-        <br>
-        <br>
-        <!-- Save progress button -->
-        <div class="save">
-            <a href="/dashboard">Save progress</a>
-        </div>
-
-        <br>
-            <!-- Progress indicator -->
-            <h3>{{page.number}} / {{page.paginator.num_pages}}</h3>
-
+    <div class="image-section" id="imageSection">
+        <div class="side-bar">
             <br>
+            <div class="flex flex-bar">
+                <i class="fa-sharp fa-regular fa-folder bar-icons"></i>
+                <h5>Files</h5>
+            </div>
+            <br>
+            <div class="flex flex-bar">
+                <i class="fa-solid fa-chart-simple bar-icons"></i>
+                <h5>Stats</h5>
+            </div>
+    
+            <br>
+            <div class="flex flex-bar">
+                <i class="fa-regular fa-floppy-disk bar-icons"></i>
+                <h5>Save</h5>
+                <!-- Used to save the progress (download the dataset folder) -->
+                <!-- <div class="save">
+                    <a href="/dashboard">Save progress</a>
+                </div> -->
+            </div>
+    
+    
+            <button id="myBtn">Dashboard</button>
+            <button id="myBtn2">Crop</button>
+            <br>
+            <div class="all-files" style="float: left">
+                {% for i in allFiles %}
+                    <a href="/?page={{ allFiles.index(i) +1 }}">{{i}}</a>
+                {% endfor %}
+            </div>
+            <!-- <div class="all-files">
+                <li><i class="fa-sharp fa-regular fa-file"></i>image.png</li>
+                <li><i class="fa-sharp fa-regular fa-file"></i>about_me_page.png</li>
+                <li><i class="fa-sharp fa-regular fa-file"></i>about_me_page.png</li>
+                <li><i class="fa-sharp fa-regular fa-file"></i>about_me_page.png</li>
+                <li><i class="fa-sharp fa-regular fa-file"></i>about_me_page.png</li>
+                <li><i class="fa-sharp fa-regular fa-file"></i>about_me_page.png</li>
+            </div> -->
+        </div>
+        <div class="hero-section">
+            <div class="heading">
+                <h1> Image-Prompt Annotator</h1>
+                <br>
+            </div>
+
             <!-- Annotation section -->
-            <div class="annotate">
-                {% for image in images %}
-                    <div id="imagesArea">
+            {% for image in images %}
+            <div class="annotation-section">
+                <!-- <div class="tag">Landing</div> -->
+    
+                <div class="flex">
+                    <div id="imagesArea" class="images">
+                        <div class="image-options">
+                            <a href="{{url_for('delete', filename=image)}}"><i class="fa-regular fa-trash-can icons"></i></a>
+                            <a id="crop" value="{{image}}"><i class="fa fa-sharp fa-crop icons"></i></a>
+                        
+                            <!-- TODO: Add copy option for cropped images  -->
+                            <!-- <label for="copy">Copy</label>
+                            <input type="checkbox" id="copy" style="display:none;" name="copy"> -->
+                            <button id="cancel" style="display:none;">Cancel</button>
+                        </div>
+
                         <img src="{{url_for('serve', filename=image)}}" alt="" id="{{image}}">
-                        <a href="{{url_for('delete', filename=image)}}">Delete</a>
-                        <label for="copy">Copy</label>
-                        <input type="checkbox" id="copy" style="display:none;" name="copy">
-                        <button id="crop" value="{{image}}">Crop</button>
-                        <button id="cancel" style="display:none;">Cancel</button>
+                        
                     </div>
 
-                    <div id="promptsSection">
+                    <div id="promptsSection" class="prompts">
                         <form action="/prompt" method="POST">
                             <!-- To set the prompt name -->
                             <input type="hidden" name="image" value="{{image}}">
@@ -104,38 +152,149 @@
 
                             {% endfor %}
                             <br>
-                            Label: <input type="text" id="label" name="label" required value="{{label}}">
-                            <div id="filters">
+                            <label for="label">Label</label>
+                            <input type="text" id="label" name="label" required value="{{label}}" class="label-style">
+                            <div id="filters" class="filters">
                                 {% for i in labels %}
                                     <div class="filter" style="display:none;" id="{{i}}">{{i}}</div>
                                 {% endfor %}
                                 <a id="add" style="display:none;">Add Category</a>
                             </div>
-                            <input type="submit">
+                            <input type="submit" class="submit-btn prompts-submit">
                         </form>
                     </div>
                 </div>
+            </div>
 
-                <br>
-                <!-- Navigate through the images -->
-                <div id="navigate">
-                    {% if page.has_previous() %}
-                        <a href="/?page={{ page.previous_page_number() }}">Previous</a>
-                    {% endif %}
-                    {% if page.has_next() %}
-                        <a href="/?page={{ page.next_page_number() }}">Next</a>
-                    {% elif page.number == page.paginator.num_pages %}
-                        <a href="/dashboard">Complete</a>
-                    {% endif %}
-                </div>
-                <br>
+            <br><br>
+            <div id="navigate" class="navigation">
+                {% if page.has_previous() %}
+                    <a href="/?page={{ page.previous_page_number() }}"><i class="fa-solid fa-angle-left nav-icons"></i></a>
+                {% endif %}
+                <h4>{{page.number}} / {{page.paginator.num_pages}}</h4>
+                {% if page.has_next() %}
+                    <a href="/?page={{ page.next_page_number() }}"><i class="fa-solid fa-angle-right nav-icons"></i></a>
+                {% elif page.number == page.paginator.num_pages %}
+                    <!-- TODO: Figure out design for this! -->
+                    <a href="/dashboard">Complete</a>
+                {% endif %}
+            </div>
             {% endfor %}
         </div>
+    </div>
     {% endif %}
 
+    <!-- MODALS -->
+    <!-- Dashboard modal -->
+    <div id="myModal" class="modal">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Dashboard</h2>
+                <span class="close">&times;</span>
+            </div>
+            <hr>
+            <br><br>
+            <div class="modal-graph">
+                <canvas id="stats" height="100px"></canvas>
+                <!-- <img src="https://canvasjs.com/wp-content/uploads/images/gallery/javascript-charts/overview/javascript-charts-graphs-index-data-label.png" alt=""> -->
+            </div>    
+        </div>
+    </div>
+
+    <!-- Crop modal -->
+    <div id="myModal2" class="modal">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Crop</h2>
+                <span class="close">&times;</span>
+            </div>
+            <hr>
+            <br><br>
+            <div class="modal-pic">
+                <img src="/images/10011.png" alt="">
+
+                <br><br>
+                <div class="modal-buttons">
+                    <button>Save</button>
+                    <button>Create a copy & save</button>
+                </div>
+            </div>
+            
+        </div>
+    </div>
 </body>
 
 <!-- Cropper js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js" integrity="sha512-6lplKUSl86rUVprDIjiW8DuOniNX8UDoRATqZSds/7t6zCQZfaCe3e5zcGaQwxa8Kpn5RTM9Fvl3X2lLV4grPQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="{{url_for('static', filename='index.js')}}"></script>
+
+<script>
+    var modal = document.getElementById("myModal");
+    var modal2 = document.getElementById("myModal2");
+    var btn = document.getElementById("myBtn");
+    var btn2 = document.getElementById("myBtn2");
+    var span = document.getElementsByClassName("close")[0];
+    var span2 = document.getElementsByClassName("close")[1];
+
+    
+    function chart() {
+    
+    // Importing colors
+    const autocolors = window['chartjs-plugin-autocolors'];
+    Chart.register(autocolors);
+
+    stats = document.getElementById("stats")
+    // Displaying a bar chart with labels and image counts 
+    new Chart(
+        stats,
+        {
+            type: 'bar',
+            data: {
+                labels: ["About", "Landing", "404", "Pending"],
+                datasets: [
+                    {
+                        label: "Files",
+                        data: [5, 10, 5, 20],
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                plugins: {
+                    autocolors: {
+                        mode: 'data'
+                    }
+                }
+            }
+        }
+    );
+}
+
+
+    btn.onclick = function() {
+        modal.style.display = "block";
+        chart()
+    }
+    
+    btn2.onclick = function() {
+        modal2.style.display = "block";
+    }
+
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+    span2.onclick = function() {
+        modal2.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal || event.target == modal2) {
+            modal.style.display = "none";
+            modal2.style.display = "none";
+        }
+    }
+</script>
+
 </html>

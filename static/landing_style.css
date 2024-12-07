@@ -14,13 +14,12 @@
     --placeholder: #F3F4F6FF;
 }
 
-body{
+#landingSection{
     padding: 0rem 7rem;
     font-family: Calibre, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     display: flex;
     height: 100vh;
-}
-
+} 
 
 .heading>h1{
     font-size: 1.5rem;
