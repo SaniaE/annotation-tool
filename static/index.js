@@ -51,6 +51,7 @@ add.addEventListener('click', ()=>{
 label.addEventListener('input', (e)=>{
     val = e.target.value;
 
+    // TODO: Add the filters class when the display is not none 
     if(val == ""){
         filters.style.display = "none";
     }
